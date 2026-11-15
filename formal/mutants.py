@@ -25,12 +25,12 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CHAIN = os.path.join(HERE, "hayalet-halka-zincir.spthy")
-LOG = os.path.join(HERE, "hayalet-halka-gunluk.spthy")
-FRESH = os.path.join(HERE, "hayalet-halka-tazelik.spthy")
-SECRET = os.path.join(HERE, "hayalet-halka-gizlilik.spthy")
-RECOVERY = os.path.join(HERE, "hayalet-halka-kurtarma.spthy")
-STRICT = os.path.join(HERE, "hayalet-halka-sikimod.spthy")
+CHAIN = os.path.join(HERE, "ghost-ring-chain.spthy")
+LOG = os.path.join(HERE, "ghost-ring-log.spthy")
+FRESH = os.path.join(HERE, "ghost-ring-freshness.spthy")
+SECRET = os.path.join(HERE, "ghost-ring-privacy.spthy")
+RECOVERY = os.path.join(HERE, "ghost-ring-recovery.spthy")
+STRICT = os.path.join(HERE, "ghost-ring-strict-mode.spthy")
 TIMEOUT = int(os.environ.get("LEMMA_TIMEOUT", "600"))
 
 BOUND_ONE_STEP = """

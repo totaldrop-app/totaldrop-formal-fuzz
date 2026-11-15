@@ -1,8 +1,8 @@
 # Formal model (Tamarin)
 
 This folder holds the Tamarin model of the account design
-([hesap.md](../docs/hesap.md),
-[decision 0013](../docs/kararlar/0013-hayalet-halka-hesap.md)) (#251).
+([accounts.md](https://github.com/totaldrop-app/totaldrop-core/blob/main/docs/accounts.md),
+[decision 0013](https://github.com/totaldrop-app/totaldrop-core/blob/main/docs/decisions/0013-ghost-ring-accounts.md)) (#251).
 Before any code is written, the design's security claims are proven or
 refuted here as lemmas.
 
@@ -13,7 +13,7 @@ The model grows piece by piece. Each piece is a separate PR:
 | A1 | Membership chain: `create`, `add`, `remove`, `rotate` | In this folder |
 | A2 | Multi-valued transparency log, witnesses, enforced inclusion (P2) | In this folder |
 | A3 | Settling of a rotate and the writer's freshness (the fix for the gap found in A2); ring secret, offers, freshness when sending and when receiving (P3) | In this folder |
-| A4 | Recovery and the recovery part of P7 (A4a); strict mode (A4b), `resolve_fork` (A4c), writing the design rules into `hesap.md` (A4d) | A4a and A4b in this folder, the rest next |
+| A4 | Recovery and the recovery part of P7 (A4a); strict mode (A4b), `resolve_fork` (A4c), writing the design rules into `accounts.md` (A4d) | A4a and A4b in this folder, the rest next |
 | A5 | TLA+ evaluation of the waiting times | Next |
 
 ## Running it
@@ -30,7 +30,7 @@ Both commands end with a non-zero exit code if a lemma is not proven or an
 attack is not found. The time limit per lemma is set with `LEMMA_TIMEOUT`
 (seconds, default 600).
 
-## A1: membership chain (`hayalet-halka-zincir.spthy`)
+## A1: membership chain (`ghost-ring-chain.spthy`)
 
 ### What the model contains
 
@@ -60,7 +60,7 @@ real system; later pieces close them.
 | The ring has two device slots | Multiset membership did not let the Tamarin search end; two slots cover a membership change and the replay of an old record | A4: resolving a fork may need three slots |
 | Each device is in one ring | A device creates or joins only one ring. So the "in the same ring" part of P1 holds by itself in this model; that the record carries the ring identity is not tested here | A3: a two-ring scenario, together with the contact's head |
 | Ring identity `h('ring', first device)` | In the design `H("ring", create)`; both are bound to the first record and never change, which makes no difference in this piece | A3: together with contact pinning |
-| The hybrid `AK` signature is two separate signatures, each signing the same body with its own label (`'ed'`, `'ml'`) | Because the body names the signer together with its two public keys, each half is bound to the other's key (hesap.md, "Keys") | Does not change |
+| The hybrid `AK` signature is two separate signatures, each signing the same body with its own label (`'ed'`, `'ml'`) | Because the body names the signer together with its two public keys, each half is bound to the other's key (accounts.md, "Keys") | Does not change |
 | `IK` is a single key | In the design `IK` is also Ed25519 + ML-DSA-65; the split into two halves for `rotate` is not tested in this piece | A3 |
 | A `remove` record names the removed device by the digest of its keys | The real record names the device by `IK`; the digest keeps Tamarin from needlessly analysing the attacker's knowledge | Does not change |
 | Records carry no ring secret (`r_e`) | Confidentiality (P3) is the subject of A3 | A3 |
@@ -119,7 +119,7 @@ is written down; if the number does not match, the script stops.
   (below, A2).
 - Forks, the log, freshness, recovery and strict mode: A2-A4.
 
-## A2: transparency log (`hayalet-halka-gunluk.spthy`)
+## A2: transparency log (`ghost-ring-log.spthy`)
 
 A1's chain, keys and attacker stay as they are. What changes is where the
 records are read from.
@@ -202,19 +202,19 @@ but a rule is needed on the contact's side. In this model (A2) the claim
 "a removed device is locked out on later heads as well" is **false**, not
 only unproven. The fix is in A3 (below).
 
-### Feedback to the design (to be written into `hesap.md` in A4)
+### Feedback to the design (to be written into `accounts.md` in A4)
 
 - The conflict between fork rules 1 and 4 (the gap above) and the fixing
   rule in A3 (settling time and the writer's freshness).
 - Binding an `AK` record to the witnessed root it was checked against, and
   treating a record that enters a root late as invalid (A3, "The
   assumption the model rests on").
-- The witness threshold: `hesap.md` says "k > n/2". For a single view, `k`
+- The witness threshold: `accounts.md` says "k > n/2". For a single view, `k`
   must be chosen together with the number `f` of witnesses that may
   collude so that `2k − n > f` (e.g. with n = 5 and k = 4, at most f = 2
   bad witnesses are tolerated; with k = 3, only f = 0).
 
-## A3: settling of a rotate (`hayalet-halka-tazelik.spthy`)
+## A3: settling of a rotate (`ghost-ring-freshness.spthy`)
 
 A2's model stays as it is; two rules are added that close the gap A2
 found. There is still no clock: "the time has passed" is an event (`Old`).
@@ -264,7 +264,7 @@ has settled, the readers that followed the `rotate` stay on it and those
 who come later follow the `remove`: a split view
 (`no_split_view_membership` does not catch this, because it compares only
 two membership changes). The design must prevent this; the proposal to
-write into `hesap.md` in A4:
+write into `accounts.md` in A4:
 
 - An `AK` record carries the witnessed root it was checked against (its
   digest or timestamp). Readers and witnesses treat a record that enters a
@@ -316,7 +316,7 @@ remove a trace. The new ones:
   attack (the `rotate` branch) is closed; the general form needs a helper
   invariant.
 
-## A3b: what a removed device cannot do, P3 (`hayalet-halka-gizlilik.spthy`)
+## A3b: what a removed device cannot do, P3 (`ghost-ring-privacy.spthy`)
 
 A3's chain, log, settling and writer's freshness stay as they are. Added:
 
@@ -332,8 +332,8 @@ A3's chain, log, settling and writer's freshness stay as they are. Added:
   freshness check: under the key of the head it uses there is neither an
   `AK` record nor a settled value. A `rotate` that has not settled yet
   does not block sending; the old head is still current then. This is
-  looser than the rule in `hesap.md` (there every valid value under the
-  key stops sending); the looser rule will be written into `hesap.md` in
+  looser than the rule in `accounts.md` (there every valid value under the
+  key stops sending); the looser rule will be written into `accounts.md` in
   A4, because with the strict rule contacts could not send for `D` after
   every weekly `rotate`.
 - The rotating device follows its own `rotate`, like the other readers,
@@ -352,7 +352,7 @@ not claimed here.
 | `r_e` is given to the members with a secure fact | HPKE and key confirmation (MAC) are tested not here but in the protocol notes and the test vectors | Stage C |
 | Offer confidentiality is expressed as the confidentiality of the ring key | Encrypting the offer to the KEM key is standard public-key encryption; adding this step as a lemma did not let the search end. Proven: the key the contact encrypts to is known only if a device that is a member of that head leaks, or if only the attacker wrote the head | Does not change |
 | Perfect freshness: the contact sees every value written before it sends | The 2-hour bound in P3 (1 hour of inclusion + 1 hour of root freshness) comes in A5 | A5 |
-| The offer signature binds the ring, the sender's head and the offer identity; it does not bind the receiving contact or the receiver's head | Resending an offer to another contact is not ruled out here; the echo of the receiver's head in `hesap.md` "Sending" and the binding to the contact will be settled in the protocol notes (stage C) | Stage C |
+| The offer signature binds the ring, the sender's head and the offer identity; it does not bind the receiving contact or the receiver's head | Resending an offer to another contact is not ruled out here; the echo of the receiver's head in `accounts.md` "Sending" and the binding to the contact will be settled in the protocol notes (stage C) | Stage C |
 | The contact's freshness check and the sending of the offer are two steps | A single step did not let the search end; the check is done again in the sending step, so the lemmas hold for the moment of sending | Does not change |
 | No handshake between the contact and the ring (Noise + ML-KEM) and no contact key `k_AB` | The handshake is tested in the existing protocol; renewing `k_AB` will be handled together with the contact book | A4 or a separate piece |
 
@@ -422,7 +422,7 @@ exists in the mutant too.
 - **A device whose `AK` leaked before the removal:** such a device can,
   before the removal, write its own branch (e.g. a record that removes the
   other member) and move contacts there. This is the "late fork, pair
-  again" limit the design accepts (`hesap.md`, "Rules to settle in the
+  again" limit the design accepts (`accounts.md`, "Rules to settle in the
   formal model", item 1) and is handled in A4.
 - **Heads two or more steps back:** e.g. `rotate`, `rotate`, then the
   removal. The reasoning above holds as it is (every previous head has an
@@ -433,7 +433,7 @@ exists in the mutant too.
 - **A third member's `rotate`:** the model uses two device slots; the
   rotating device is either `x` or the remover. The reasoning carries over
   to a third member as it is, but it is not expressed in the model.
-- **A3's model with the old rule:** in `hayalet-halka-tazelik.spthy` the
+- **A3's model with the old rule:** in `ghost-ring-freshness.spthy` the
   rotating device still moves to its own `rotate`'s head at once; A3's
   lemmas were proven with that rule. Because the new rule changes the
   device's behaviour (it keeps writing from the old head), A3's results
@@ -447,9 +447,9 @@ exists in the mutant too.
   of the offer comes from standard public-key encryption and is not a
   separate lemma.
 
-### Feedback to the design (to be written into `hesap.md` in A4)
+### Feedback to the design (to be written into `accounts.md` in A4)
 
-- **Freshness rule:** `hesap.md` stops sending on every valid value under
+- **Freshness rule:** `accounts.md` stops sending on every valid value under
   the key. The model uses the looser rule: an `AK` record or a settled
   value stops it, an unsettled `rotate` does not. Together with the next
   item the looser rule is safe, and it keeps contacts from being unable to
@@ -468,10 +468,10 @@ exists in the mutant too.
   moment by which every contact must count it as settled (margin: clock
   skew and root age). It will be settled numerically in A5.
 - **Offer signature:** it should bind the receiving contact (or the
-  context shared with the contact) and the receiver's head; `hesap.md`
+  context shared with the contact) and the receiver's head; `accounts.md`
   should state plainly what is bound.
 
-## A4a: recovery (`hayalet-halka-kurtarma.spthy`)
+## A4a: recovery (`ghost-ring-recovery.spthy`)
 
 A3's chain, log, settling and writer's freshness, with A3b's `rotate` rule
 (the rotating device follows its own `rotate` once it has settled). Added:
@@ -500,7 +500,7 @@ A3's chain, log, settling and writer's freshness, with A3b's `rotate` rule
   entered the log first, the reader follows neither.
 - `recovery_reject`: an `AK` record a member writes from its current head.
   Unlike the other records it does not depend on the writer's freshness: a
-  reject always counts (`hesap.md`, fork rule 5). The rule's only
+  reject always counts (`accounts.md`, fork rule 5). The rule's only
   precondition is the member's view, so the member can write it at any
   moment of the wait. With the priority rule it stops the recovery against
   `m`.
@@ -522,7 +522,7 @@ key. The independent review found two traces:
   freshness forbade `d` from writing (rejecting) under that key any more;
   the value before the recovery also blocked `d`'s own `rotate`. `d`'s
   only way was to follow the thief's recovery. This contradicted the rule
-  "the device branch stays valid" in `hesap.md`.
+  "the device branch stays valid" in `accounts.md`.
 - **Two recoveries split the readers:** when the owner and the thief wrote
   two separate recoveries under the same key, one device followed one and
   one contact the other.
@@ -593,7 +593,7 @@ as a lemma.
   proposal, the new member is an honest device or the proposer's `AK`
   leaked) did not finish in 10 minutes. A4c.
 - **If the phone and the phrase are stolen together,** P7 gives no
-  assurance (`hesap.md`, P7); the model does not claim it.
+  assurance (`accounts.md`, P7); the model does not claim it.
 - **Endless rejection by a thief who holds `AK`:** someone who steals an
   unlocked device can reject every recovery with the priority rule. The
   owner's way out is `resolve_fork`: A4c.
@@ -605,7 +605,7 @@ as a lemma.
   settled recovery and an offline member then writes a reject from the
   same period, A stays on the recovery branch and the member on the reject
   branch. In the model readers never follow a reject and this fork is not
-  detected (`hesap.md` rules 5 and 6): A4c.
+  detected (`accounts.md` rules 5 and 6): A4c.
 - **Someone who stole only the phrase can stop the owner's recovery for
   good:** writing a second recovery against the same period stops both
   with `Rec_Single`. `resolve_fork` does not solve this either, because it
@@ -616,7 +616,7 @@ as a lemma.
   no lemmas for what happens after a recovery.
 - Forks after a recovery, `resolve_fork` and a rejected `RK`: A4c.
 
-### Feedback to the design (to be written into `hesap.md` in A4d)
+### Feedback to the design (to be written into `accounts.md` in A4d)
 
 - A recovery is a proposal written not against a head but against the
   membership period; `rotate` does not stop it, it carries over. A member
@@ -628,22 +628,22 @@ as a lemma.
   or filled head must also be able to reject.
 - For priority, a real reader must look for an `AK` record under **every**
   head of period `m` (including `rotate` branches it does not follow and
-  forked heads). `hesap.md` says only "under the same key" today. The
+  forked heads). `accounts.md` says only "under the same key" today. The
   model counts every value with a valid `AK` signature whatever its `op`;
   this is cautious for P7.
 - The model writes the recovery under a separate key `h('rlog', m)`;
-  `hesap.md:447`, however, describes the recovery under `L_{e+1}`, naming
+  `accounts.md:447`, however, describes the recovery under `L_{e+1}`, naming
   the newest head as its parent. One must be chosen in A4d.
 - The contact's re-verification is bound to the digest of the recovery
   record (the re-find mailbox is already named with this digest).
 - The contacts' half of P7 rests not on the words but on the contact
-  recognising the other person out of band; `hesap.md` and the user texts
+  recognising the other person out of band; `accounts.md` and the user texts
   should say this plainly.
 
-## A4b: strict mode (`hayalet-halka-sikimod.spthy`)
+## A4b: strict mode (`ghost-ring-strict-mode.spthy`)
 
 Built on A4a's idea of membership periods and proposals. In strict mode a
-single signature cannot change membership at once (`hesap.md`,
+single signature cannot change membership at once (`accounts.md`,
 "Multi-layer approval", K3b). Every change is a **proposal** written
 against the membership period `m` that readers follow only once it has
 settled (in reality 72 hours of witness time):
@@ -669,7 +669,7 @@ the later ones until it is rejected, or settles and is followed itself;
 the ones written later do not count against the earlier proposal.
 
 With these rules the model proposes an answer to two questions in the
-"Rules to settle in the formal model" section of `hesap.md`: the ordering
+"Rules to settle in the formal model" section of `accounts.md`: the ordering
 of the pending record (a proposal against the period, which does not race
 with the head's key, one change per period) and the exact definition of
 the `RK` path when a stolen device vetoes (`rk_remove`).
@@ -681,7 +681,7 @@ written from the period stopped all of that period's proposals),
 `reject_pending` and `recovery_reject` were a single record, and
 `rk_remove` carried only the `RK` signature. The independent review found:
 
-- **Critical:** according to `hesap.md`, `recovery_reject` voids `RK`. With
+- **Critical:** according to `accounts.md`, `recovery_reject` voids `RK`. With
   the two rejects as one record, the stolen device's veto also voided `RK`
   and closed the `RK` path. Now `reject_pending` is a separate, targeted
   record (below, feedback to the design).
@@ -723,7 +723,7 @@ The second review (b7a25cf) gave three important findings, all fixed:
 | No two-signature `add` and `remove` | With two slots there can be no two-signature `add`. A two-signature `remove` (two members' signatures, at once) is the honest way, but removing the device in the second slot needs its signature too; that is not possible in the stolen-device scenario. Its interaction with proposals was not modelled | A4c |
 | No `rotate` | Proposals are written against the period and `rotate` does not change the period; A4a showed that `rotate` blocks neither recovery nor reject | Does not change |
 | A reject does not start a new period; readers do not follow a reject | A targeted reject voids only its own proposal; the period's members do not change | Does not change |
-| **A rejected `RK` does not become invalid** | According to `hesap.md`, `recovery_reject` voids `RK`; here `RK` is permanent. Voiding must not happen through the reject of `x`, the target of `rk_remove(x)` (below) | A4c (with `change_phrase`) |
+| **A rejected `RK` does not become invalid** | According to `accounts.md`, `recovery_reject` voids `RK`; here `RK` is permanent. Voiding must not happen through the reject of `x`, the target of `rk_remove(x)` (below) | A4c (with `change_phrase`) |
 | The added device gets no view once the proposal is followed | Not needed for this piece's properties (as in A4a) | A4c |
 | Every record has a single settling moment (`Old_Once`); proposals against a period settle in the order they entered the log (`Settle_In_Order`) | All the rules look only at the first settling moment. In reality the wait is the same for everyone, so the settling order is the log order | Does not change |
 | No extra factor for recovery in strict mode (YubiKey, Shamir share) | An extra factor only makes stealing the phrase harder | Stage C |
@@ -767,7 +767,7 @@ reader rules as in A4a.
 
 - **If the phone and the phrase are stolen together,** strict mode gives no
   assurance either: the thief can write `rk_remove` with the `AK` of the
-  device in hand and the phrase, and remove the owner's device. `hesap.md`
+  device in hand and the phrase, and remove the owner's device. `accounts.md`
   leaves this outside P7; the way out is pairing again.
 - **Denial of service:** a device stolen unlocked can reject every `AK`
   proposal and keep writing new proposals; the owner has to reject each one
@@ -789,7 +789,7 @@ reader rules as in A4a.
   time-bound). Rings with two or more members, a `policy` change and the
   ring after a proposal is followed: A4c and stage C.
 
-### Feedback to the design (to be written into `hesap.md` in A4d)
+### Feedback to the design (to be written into `accounts.md` in A4d)
 
 - In strict mode every change is a proposal against the membership period,
   has its own log key and does not race with the head's key; one change
@@ -801,7 +801,7 @@ reader rules as in A4a.
   still write to an old period (a thief holding the removed device's `AK`)
   can make late-reading contacts never follow the change
   (`sanity_late_proposal_does_not_block`).
-- A departure from `hesap.md` rule 5: by rule 5 a recovery record does not
+- A departure from `accounts.md` rule 5: by rule 5 a recovery record does not
   open a fork and the device record has priority. In strict mode a
   recovery is a proposal too and joins the same queue: a live `AK`
   proposal written before it in the same period stops it, and an `AK`

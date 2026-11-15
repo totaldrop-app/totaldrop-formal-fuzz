@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
- * Ghost ring (docs/hesap.md, decision 0013), part 1 of the formal model
+ * Ghost ring (docs/accounts.md, decision 0013), part 1 of the formal model
  * (#251): the membership chain without the log.
  *
  * Modelled: create, add, remove and rotate records; every device and every
@@ -26,7 +26,7 @@
  *    stands for the comparison of verification words.
  */
 
-theory HayaletHalkaZincir
+theory GhostRingChain
 begin
 
 builtins: signing, hashing

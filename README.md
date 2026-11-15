@@ -26,12 +26,12 @@ The Tamarin models verify the Hayalet Halka (Ghost Ring) multi-device account ar
 
 | Piece | Theory File | Lemmas | Mutants | Verified Properties |
 | --- | --- | ---: | ---: | --- |
-| **A1** | `hayalet-halka-zincir.spthy` | 7 | 6 | Membership chain (`create`, `add`, `remove`, `rotate`), hybrid `Ed25519` + `ML-DSA-65` `AK` binding (**P1**), previous-head anti-replay, `IK`-scoped rotation. |
-| **A2** | `hayalet-halka-gunluk.spthy` | 8 | 4 | Multi-valued witnessed transparency log (**P2**), enforced inclusion, single-view membership (`no_split_view_membership`), old-head removal lockout (**H3**), and discovery of the `rotate`-branch survival trace. |
-| **A3** | `hayalet-halka-tazelik.spthy` | 5 | 2 | `rotate` settling window `D` + writer root freshness closing A2's `rotate`-branch gap (`no_rotate_branch_past_removal`). |
-| **A3b** | `hayalet-halka-gizlilik.spthy` | 14 | 5 | Epoch KEM confidentiality (`sent_head_key_secret`), contact send/receive log freshness (**P3**), offer authenticity, and post-rotation removal safety. |
-| **A4a** | `hayalet-halka-kurtarma.spthy` | 13 | 4 | 24-word `RK` recovery bound to membership periods (**P7**), mandatory pending wait, unconditional `recovery_reject` priority, double-recovery fork halt, and out-of-band contact word re-verification. |
-| **A4b** | `hayalet-halka-sikimod.spthy` | 14 | 6 | Multi-layer approval (strict mode): settled change proposals, stolen-device veto vs `RK + staying member` removal override, and single-view change resolution. |
+| **A1** | `ghost-ring-chain.spthy` | 7 | 6 | Membership chain (`create`, `add`, `remove`, `rotate`), hybrid `Ed25519` + `ML-DSA-65` `AK` binding (**P1**), previous-head anti-replay, `IK`-scoped rotation. |
+| **A2** | `ghost-ring-log.spthy` | 8 | 4 | Multi-valued witnessed transparency log (**P2**), enforced inclusion, single-view membership (`no_split_view_membership`), old-head removal lockout (**H3**), and discovery of the `rotate`-branch survival trace. |
+| **A3** | `ghost-ring-freshness.spthy` | 5 | 2 | `rotate` settling window `D` + writer root freshness closing A2's `rotate`-branch gap (`no_rotate_branch_past_removal`). |
+| **A3b** | `ghost-ring-privacy.spthy` | 14 | 5 | Epoch KEM confidentiality (`sent_head_key_secret`), contact send/receive log freshness (**P3**), offer authenticity, and post-rotation removal safety. |
+| **A4a** | `ghost-ring-recovery.spthy` | 13 | 4 | 24-word `RK` recovery bound to membership periods (**P7**), mandatory pending wait, unconditional `recovery_reject` priority, double-recovery fork halt, and out-of-band contact word re-verification. |
+| **A4b** | `ghost-ring-strict-mode.spthy` | 14 | 6 | Multi-layer approval (strict mode): settled change proposals, stolen-device veto vs `RK + staying member` removal override, and single-view change resolution. |
 | **Total** | **6 `.spthy` models** | **61** | **27** | Full specification and abstraction notes in [`formal/README.md`](formal/README.md). |
 
 ### Running Formal Proofs & Mutant Checks
@@ -43,7 +43,7 @@ Requires `tamarin-prover` `1.12.0` and `maude` `3.5.1` on `PATH`:
 ./formal/check.sh
 
 # Prove a single model
-FORMAL_MODELS=hayalet-halka-sikimod.spthy ./formal/check.sh
+FORMAL_MODELS=ghost-ring-strict-mode.spthy ./formal/check.sh
 
 # Run all 27 negative mutation checks (each must yield a verified attack trace)
 ./formal/mutants.py

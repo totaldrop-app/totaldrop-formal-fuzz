@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
- * Ghost ring (docs/hesap.md, decision 0013), part 4b of the formal model
+ * Ghost ring (docs/accounts.md, decision 0013), part 4b of the formal model
  * (#251): strict mode, and K3b.
  *
- * Built on the ideas of part 4a (hayalet-halka-kurtarma.spthy):
+ * Built on the ideas of part 4a (ghost-ring-recovery.spthy):
  * membership periods and proposals against a period. In strict mode no
  * single signature changes membership at once. Every change is a
  * proposal against the period m that waits (72 hours of witness time)
@@ -33,7 +33,7 @@
  * reject in this part (see README.md, A4b, abstractions).
  */
 
-theory HayaletHalkaSikiMod
+theory GhostRingStrictMode
 begin
 
 builtins: signing, hashing
