@@ -22,10 +22,10 @@ fuzz_target!(|data: &[u8]| {
         }
         assert_eq!(b.finish(), data);
     }
-    if let Ok(s) = std::str::from_utf8(data) {
-        if let Some((a, b)) = relay::parse_pair_name(s) {
-            assert_eq!(relay::pair_name(&a, &b), s);
-        }
+    if let Ok(s) = std::str::from_utf8(data)
+        && let Some((a, b)) = relay::parse_pair_name(s)
+    {
+        assert_eq!(relay::pair_name(&a, &b), s);
     }
     let _ = relay::parse_stun_request(data);
     let _ = relay::parse_stun_response(data, &[0u8; 12]);

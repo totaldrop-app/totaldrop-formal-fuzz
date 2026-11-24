@@ -1722,6 +1722,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "totaldrop-windows-bridge"
+version = "0.2.0-beta.5"
+dependencies = [
+ "icu_locale",
+ "serde",
+ "serde_json",
+ "tokio",
+ "totaldrop-core",
+ "totaldrop-l10n",
+ "totaldrop-proto",
+]
+
+[[package]]
 name = "tower-service"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
